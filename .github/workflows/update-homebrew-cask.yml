@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to publish to the tap (e.g. v1.4.0)"
+        description: "Release tag to publish to the tap (e.g. v1.0.0)"
         required: true
         type: string
 
@@ -18,9 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
     env:
-      TAP_OWNER: siddharthvaddem
-      TAP_REPO: homebrew-openscreen
-      CASK_NAME: openscreen
+      TAP_OWNER: jkxln101-lang
+      TAP_REPO: homebrew-openscreen-101
+      CASK_NAME: openscreen-101
     steps:
       - name: Resolve tag and version
         id: meta
@@ -112,11 +112,6 @@ jobs:
           mkdir -p tap/Casks
           BASE="https://github.com/${REPO}/releases/download/${TAG}"
 
-          # #{version} is Ruby interpolation written literally to the cask
-          # file (bash heredoc leaves "#{...}" alone). \${VERSION}, \${ARM_SHA},
-          # etc. are bash variables expanded by the heredoc. The literal
-          # #{version} fixes Homebrew's "URL is unversioned" audit warning by
-          # making the version string statically detectable.
           cat > "tap/Casks/${CASK_NAME}.rb" <<EOF
           cask "${CASK_NAME}" do
             version "${VERSION}"
@@ -132,8 +127,8 @@ jobs:
               url "https://github.com/${REPO}/releases/download/v#{version}/${X64_NAME}"
             end
 
-            name "Openscreen"
-            desc "Screen recorder and video editor"
+            name "OpenScreen 101"
+            desc "Screen recorder and video editor - enhanced fork"
             homepage "https://github.com/${REPO}"
 
             auto_updates false
@@ -143,10 +138,10 @@ jobs:
 
             zap trash: [
               "~/Library/Application Support/Openscreen",
-              "~/Library/Caches/com.siddharthvaddem.openscreen",
+              "~/Library/Caches/com.jkxln101.openscreen101",
               "~/Library/Logs/Openscreen",
-              "~/Library/Preferences/com.siddharthvaddem.openscreen.plist",
-              "~/Library/Saved Application State/com.siddharthvaddem.openscreen.savedState",
+              "~/Library/Preferences/com.jkxln101.openscreen101.plist",
+              "~/Library/Saved Application State/com.jkxln101.openscreen101.savedState",
             ]
           end
           EOF

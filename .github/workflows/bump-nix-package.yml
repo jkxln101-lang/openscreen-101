@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to bump (e.g. v1.5.0)"
+        description: "Release tag to bump (e.g. v1.0.0)"
         required: true
         type: string
 
@@ -68,9 +68,7 @@ jobs:
           HASH: ${{ steps.hash.outputs.hash }}
         run: |
           set -euo pipefail
-          # Update version line: `  version = "<anything>";`
           sed -i -E "s|^([[:space:]]*version[[:space:]]*=[[:space:]]*)\"[^\"]*\";|\1\"${VERSION}\";|" nix/package.nix
-          # Update npmDepsHash line: `  npmDepsHash = "<anything>";`
           sed -i -E "s|^([[:space:]]*npmDepsHash[[:space:]]*=[[:space:]]*)\"[^\"]*\";|\1\"${HASH}\";|" nix/package.nix
 
           echo "=== diff ==="
@@ -94,7 +92,6 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Replace any prior bump branch to keep the workflow idempotent.
           git push origin --delete "$BRANCH" 2>/dev/null || true
           git checkout -b "$BRANCH"
           git add nix/package.nix
@@ -111,7 +108,7 @@ jobs:
           - \`version\` → \`${VERSION}\`
           - \`npmDepsHash\` → \`${HASH}\` (computed via \`prefetch-npm-deps package-lock.json\`)
 
-          Merge this so Nix users (NixOS, Home Manager, \`nix run github:siddharthvaddem/openscreen\`) pick up the new release.
+          Merge this so Nix users (NixOS, Home Manager, \`nix run github:jkxln101-lang/openscreen-101\`) pick up the new release.
 
           > Note: PRs opened by \`GITHUB_TOKEN\` don't auto-trigger CI. The diff is two lines — review the change here, then merge. If you want CI to run, push an empty commit to this branch or close-and-reopen the PR.
           EOF
