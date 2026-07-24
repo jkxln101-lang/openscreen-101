@@ -3,6 +3,7 @@
 		"previewHold": "Giữ để xem trước hiệu ứng phóng to",
 		"level": "Mức độ thu phóng",
 		"selectRegion": "Chọn vùng thu phóng để điều chỉnh",
+		"selectRegionButton": "Chọn vùng",
 		"deleteZoom": "Xóa thu phóng",
 		"focusMode": {
 			"title": "Chế độ lấy nét",
@@ -92,7 +93,10 @@
 		"title": "Độ phân giải xuất",
 		"low": "720p",
 		"medium": "1080p",
-		"high": "Source"
+		"high": "2K (1440p)",
+		"ultra": "4K (2160p)",
+		"source": "Gốc",
+		"upscale": "Phóng to"
 	},
 	"gifSettings": {
 		"frameRate": "Tốc độ khung hình GIF",

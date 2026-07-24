@@ -512,7 +512,11 @@ export function normalizeProjectEditor(editor: Partial<ProjectEditorState>): Pro
 				: DEFAULT_WEBCAM_SETTINGS.sizePreset,
 		webcamPosition: normalizedWebcamPosition,
 		exportQuality:
-			editor.exportQuality === "medium" || editor.exportQuality === "source"
+			editor.exportQuality === "medium" ||
+			editor.exportQuality === "good" ||
+			editor.exportQuality === "high" ||
+			editor.exportQuality === "ultra" ||
+			editor.exportQuality === "source"
 				? editor.exportQuality
 				: DEFAULT_EXPORT_SETTINGS.quality,
 		exportFormat: editor.exportFormat === "gif" ? "gif" : DEFAULT_EXPORT_SETTINGS.format,

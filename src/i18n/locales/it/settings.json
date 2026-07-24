@@ -4,6 +4,7 @@
 		"level": "Livello zoom",
 		"customScale": "Zoom personalizzato",
 		"selectRegion": "Seleziona una regione zoom da regolare",
+		"selectRegionButton": "Seleziona regione",
 		"deleteZoom": "Elimina zoom",
 		"focusMode": {
 			"title": "Modalità messa a fuoco",
@@ -92,7 +93,10 @@
 		"title": "Risoluzione esportazione",
 		"low": "720p",
 		"medium": "1080p",
-		"high": "Originale"
+		"high": "2K (1440p)",
+		"ultra": "4K (2160p)",
+		"source": "Originale",
+		"upscale": "Ingrandisci"
 	},
 	"gifSettings": {
 		"frameRate": "Frequenza fotogrammi GIF",

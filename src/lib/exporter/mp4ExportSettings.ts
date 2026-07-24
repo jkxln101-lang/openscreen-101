@@ -13,6 +13,8 @@ interface SourceCropRegion {
 
 const MEDIUM_SHORT_SIDE = 720;
 const HIGH_SHORT_SIDE = 1080;
+const ULTRA_HIGH_SHORT_SIDE = 1440; // 2K
+const ULTRA_SHORT_SIDE = 2160; // 4K
 
 function even(value: number) {
 	return Math.floor(value / 2) * 2;
@@ -103,6 +105,18 @@ function calculateBitrate(width: number, height: number, quality: ExportQuality)
 		return 30_000_000;
 	}
 
+	if (quality === "ultra") {
+		if (totalPixels > 3840 * 2160) return 100_000_000;
+		if (totalPixels > 2560 * 1440) return 80_000_000;
+		return 50_000_000;
+	}
+
+	if (quality === "high") {
+		if (totalPixels > 2560 * 1440) return 60_000_000;
+		return 40_000_000;
+	}
+
+	// medium and good
 	if (totalPixels <= 1280 * 720) return 10_000_000;
 	if (totalPixels <= 1920 * 1080) return 20_000_000;
 	return 30_000_000;
@@ -129,6 +143,22 @@ export function calculateMp4ExportSettings({
 
 	if (quality === "good") {
 		const dimensions = calculateDimensionsForShortSide(HIGH_SHORT_SIDE, aspectRatioValue);
+		return {
+			...dimensions,
+			bitrate: calculateBitrate(dimensions.width, dimensions.height, quality),
+		};
+	}
+
+	if (quality === "high") {
+		const dimensions = calculateDimensionsForShortSide(ULTRA_HIGH_SHORT_SIDE, aspectRatioValue);
+		return {
+			...dimensions,
+			bitrate: calculateBitrate(dimensions.width, dimensions.height, quality),
+		};
+	}
+
+	if (quality === "ultra") {
+		const dimensions = calculateDimensionsForShortSide(ULTRA_SHORT_SIDE, aspectRatioValue);
 		return {
 			...dimensions,
 			bitrate: calculateBitrate(dimensions.width, dimensions.height, quality),

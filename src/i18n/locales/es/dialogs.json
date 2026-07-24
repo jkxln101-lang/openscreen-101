@@ -57,6 +57,9 @@
 		"detailLoadProject": "¿Deseas guardar tu proyecto antes de cargar otro?",
 		"saveAndLoadProject": "Guardar y cargar proyecto",
 		"discardAndLoadProject": "Descartar y cargar proyecto",
+		"detailImportVideo": "¿Desea guardar su proyecto antes de importar un video?",
+		"saveAndImportVideo": "Guardar e importar video",
+		"discardAndImportVideo": "Descartar e importar video",
 		"loadProject": "Cargar proyecto…",
 		"saveProject": "Guardar proyecto…",
 		"saveProjectAs": "Guardar proyecto como…"

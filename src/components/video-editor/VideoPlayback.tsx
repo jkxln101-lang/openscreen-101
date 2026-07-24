@@ -62,9 +62,13 @@ import {
 	getZoomScale,
 	isRotation3DIdentity,
 	lerpRotation3D,
+	MAX_ZOOM_SCALE,
+	MIN_ZOOM_SCALE,
 	rotation3DPerspective,
 	type SpeedRegion,
 	type TrimRegion,
+	ZOOM_DEPTH_SCALES,
+	type ZoomDepth,
 	type ZoomFocus,
 	type ZoomRegion,
 } from "./types";
@@ -112,6 +116,13 @@ interface VideoPlaybackProps {
 	onSelectZoom: (id: string | null) => void;
 	onZoomFocusChange: (id: string, focus: ZoomFocus) => void;
 	onZoomFocusDragEnd?: () => void;
+	regionSelectionMode?: boolean;
+	onRegionSelectionModeChange?: (enabled: boolean) => void;
+	onRegionSelected?: (region: {
+		focus: ZoomFocus;
+		customScale: number;
+		depth: import("./types").ZoomDepth;
+	}) => void;
 	isPlaying: boolean;
 	showShadow?: boolean;
 	shadowIntensity?: number;
@@ -239,6 +250,9 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 			onSelectZoom,
 			onZoomFocusChange,
 			onZoomFocusDragEnd,
+			regionSelectionMode,
+			onRegionSelectionModeChange,
+			onRegionSelected,
 			isPlaying,
 			showShadow,
 			shadowIntensity = 0,
@@ -295,6 +309,13 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 		const [overlaySize, setOverlaySize] = useState({ width: 800, height: 600 });
 		const [overlayElement, setOverlayElement] = useState<HTMLDivElement | null>(null);
 		const overlayRef = useRef<HTMLDivElement | null>(null);
+		const [selectionRect, setSelectionRect] = useState<{
+			x: number;
+			y: number;
+			width: number;
+			height: number;
+		} | null>(null);
+		const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
 
 		const focusIndicatorRef = useRef<HTMLDivElement | null>(null);
 		const composite3DRef = useRef<HTMLDivElement | null>(null);
@@ -686,6 +707,19 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 
 		const handleOverlayPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
 			if (isPlayingRef.current) return;
+
+			// Region selection mode: draw a selection rectangle
+			if (regionSelectionMode) {
+				event.preventDefault();
+				const rect = event.currentTarget.getBoundingClientRect();
+				const x = event.clientX - rect.left;
+				const y = event.clientY - rect.top;
+				selectionStartRef.current = { x, y };
+				setSelectionRect({ x, y, width: 0, height: 0 });
+				event.currentTarget.setPointerCapture(event.pointerId);
+				return;
+			}
+
 			const regionId = selectedZoomIdRef.current;
 			if (!regionId) return;
 			const region = zoomRegionsRef.current.find((r) => r.id === regionId);
@@ -699,6 +733,23 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 		};
 
 		const handleOverlayPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+			// Region selection mode: update selection rectangle
+			if (regionSelectionMode && selectionStartRef.current) {
+				event.preventDefault();
+				const rect = event.currentTarget.getBoundingClientRect();
+				const currentX = event.clientX - rect.left;
+				const currentY = event.clientY - rect.top;
+				const startX = selectionStartRef.current.x;
+				const startY = selectionStartRef.current.y;
+				setSelectionRect({
+					x: Math.min(startX, currentX),
+					y: Math.min(startY, currentY),
+					width: Math.abs(currentX - startX),
+					height: Math.abs(currentY - startY),
+				});
+				return;
+			}
+
 			if (!isDraggingFocusRef.current) return;
 			event.preventDefault();
 			updateFocusFromClientPoint(event.clientX, event.clientY);
@@ -716,10 +767,72 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 		};
 
 		const handleOverlayPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+			// Region selection mode: compute focus and scale from selection
+			if (regionSelectionMode && selectionStartRef.current && selectionRect) {
+				const rect = event.currentTarget.getBoundingClientRect();
+				const stageWidth = rect.width;
+				const stageHeight = rect.height;
+
+				if (
+					stageWidth > 0 &&
+					stageHeight > 0 &&
+					selectionRect.width > 10 &&
+					selectionRect.height > 10
+				) {
+					const focusCx = clamp01((selectionRect.x + selectionRect.width / 2) / stageWidth);
+					const focusCy = clamp01((selectionRect.y + selectionRect.height / 2) / stageHeight);
+
+					const scaleX = stageWidth / selectionRect.width;
+					const scaleY = stageHeight / selectionRect.height;
+					const rawScale = Math.min(scaleX, scaleY);
+					const customScale =
+						Math.round(Math.max(MIN_ZOOM_SCALE, Math.min(MAX_ZOOM_SCALE, rawScale)) * 100) / 100;
+
+					// Find the closest depth preset
+					let closestDepth: ZoomDepth = 3;
+					let minDiff = Infinity;
+					for (const [depthKey, scale] of Object.entries(ZOOM_DEPTH_SCALES)) {
+						const diff = Math.abs(scale - customScale);
+						if (diff < minDiff) {
+							minDiff = diff;
+							closestDepth = Number(depthKey) as ZoomDepth;
+						}
+					}
+
+					onRegionSelected?.({
+						focus: { cx: focusCx, cy: focusCy },
+						customScale,
+						depth: closestDepth,
+					});
+					onRegionSelectionModeChange?.(false);
+				}
+
+				selectionStartRef.current = null;
+				setSelectionRect(null);
+				try {
+					event.currentTarget.releasePointerCapture(event.pointerId);
+				} catch {
+					// Pointer may already be released.
+				}
+				return;
+			}
+
 			endFocusDrag(event);
 		};
 
 		const handleOverlayPointerLeave = (event: React.PointerEvent<HTMLDivElement>) => {
+			// Region selection mode: cancel selection
+			if (regionSelectionMode) {
+				selectionStartRef.current = null;
+				setSelectionRect(null);
+				try {
+					event.currentTarget.releasePointerCapture(event.pointerId);
+				} catch {
+					// Pointer may already be released.
+				}
+				return;
+			}
+
 			endFocusDrag(event);
 		};
 
@@ -1975,17 +2088,35 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 						<div
 							ref={setOverlayRefs}
 							className="absolute inset-0 select-none"
-							style={{ pointerEvents: "auto", zIndex: 30 }}
+							style={{
+								pointerEvents: "auto",
+								zIndex: 30,
+								cursor: regionSelectionMode ? "crosshair" : undefined,
+							}}
 							onPointerDown={handleOverlayPointerDown}
 							onPointerMove={handleOverlayPointerMove}
 							onPointerUp={handleOverlayPointerUp}
 							onPointerLeave={handleOverlayPointerLeave}
 						>
-							<div
-								ref={focusIndicatorRef}
-								className="absolute rounded-md border border-[#34B27B]/80 bg-[#34B27B]/20 shadow-[0_0_0_1px_rgba(52,178,123,0.35)]"
-								style={{ display: "none", pointerEvents: "none" }}
-							/>
+							{!regionSelectionMode && (
+								<div
+									ref={focusIndicatorRef}
+									className="absolute rounded-md border border-[#34B27B]/80 bg-[#34B27B]/20 shadow-[0_0_0_1px_rgba(52,178,123,0.35)]"
+									style={{ display: "none", pointerEvents: "none" }}
+								/>
+							)}
+							{selectionRect && regionSelectionMode && (
+								<div
+									className="absolute border-2 border-dashed border-[#34B27B] bg-[#34B27B]/10 rounded-sm"
+									style={{
+										left: selectionRect.x,
+										top: selectionRect.y,
+										width: selectionRect.width,
+										height: selectionRect.height,
+										pointerEvents: "none",
+									}}
+								/>
+							)}
 							{(() => {
 								const filteredAnnotations = (annotationRegions || []).filter((annotation) => {
 									if (

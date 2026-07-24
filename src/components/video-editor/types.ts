@@ -409,7 +409,7 @@ export const ZOOM_DEPTH_SCALES: Record<ZoomDepth, number> = {
 export const MIN_ZOOM_SCALE = 1.0;
 export const MAX_ZOOM_SCALE = 5.0;
 
-export const DEFAULT_ZOOM_DEPTH: ZoomDepth = 3;
+export const DEFAULT_ZOOM_DEPTH: ZoomDepth = 1;
 
 /** Returns the effective zoom scale for a region, preferring customScale over the preset. */
 export function getZoomScale(region: ZoomRegion): number {

@@ -3,6 +3,7 @@
 		"previewHold": "按住預覽放大效果",
 		"level": "縮放級別",
 		"selectRegion": "選擇要調整的縮放區域",
+		"selectRegionButton": "選擇區域",
 		"deleteZoom": "刪除縮放",
 		"focusMode": {
 			"title": "對焦模式",
@@ -93,7 +94,10 @@
 		"title": "匯出解析度",
 		"low": "720p",
 		"medium": "1080p",
-		"high": "Source"
+		"high": "2K (1440p)",
+		"ultra": "4K (2160p)",
+		"source": "來源",
+		"upscale": "放大"
 	},
 	"gifSettings": {
 		"frameRate": "GIF 影格率",

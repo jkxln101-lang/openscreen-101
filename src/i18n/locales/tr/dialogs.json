@@ -57,6 +57,9 @@
 		"detailLoadProject": "Başka bir proje yüklemeden önce kaydetmek ister misiniz?",
 		"saveAndLoadProject": "Kaydet ve Proje Yükle",
 		"discardAndLoadProject": "Kaydetmeden Proje Yükle",
+		"detailImportVideo": "Video içe aktarmadan önce projenizi kaydetmek istiyor musunuz?",
+		"saveAndImportVideo": "Kaydet ve video içe aktar",
+		"discardAndImportVideo": "Vazgeç ve video içe aktar",
 		"loadProject": "Proje Yükle…",
 		"saveProject": "Proje Kaydet…",
 		"saveProjectAs": "Farklı Kaydet…"

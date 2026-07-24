@@ -147,6 +147,7 @@ export function LaunchWindow() {
 	const languageMenuPanelRef = useRef<HTMLDivElement | null>(null);
 	const hudBarRef = useRef<HTMLDivElement | null>(null);
 	const deviceSelectorRef = useRef<HTMLDivElement | null>(null);
+	const languagePromptRef = useRef<HTMLDivElement | null>(null);
 	// Measured bar height, anchors the popups above the tall vertical tray so they don't overlap it.
 	const [hudBarHeight, setHudBarHeight] = useState(0);
 	const [languageMenuStyle, setLanguageMenuStyle] = useState<{
@@ -348,6 +349,17 @@ export function LaunchWindow() {
 			halfWidth = Math.max(halfWidth, centerX - rect.left, rect.right - centerX);
 		}
 
+		// Language prompt banner sits above the bar (fixed top-8). Include its height so the
+		// window grows tall enough to show it fully.
+		if (languagePromptRef.current) {
+			const rect = languagePromptRef.current.getBoundingClientRect();
+			if (rect.height > 0) {
+				// Prompt is fixed at top-8 (32px), so its total contribution is height + 32px top margin
+				topFromBottom = Math.max(topFromBottom, rect.height + 32);
+				halfWidth = Math.max(halfWidth, rect.width / 2);
+			}
+		}
+
 		setHudBarHeight((prev) => {
 			const next = Math.round(barEl.scrollHeight);
 			return Math.abs(prev - next) > 1 ? next : prev;
@@ -397,6 +409,10 @@ export function LaunchWindow() {
 	);
 	const setLanguageMenuPanelEl = useCallback(
 		(el: HTMLDivElement | null) => observeHudElement(el, languageMenuPanelRef),
+		[observeHudElement],
+	);
+	const setLanguagePromptEl = useCallback(
+		(el: HTMLDivElement | null) => observeHudElement(el, languagePromptRef),
 		[observeHudElement],
 	);
 
@@ -518,6 +534,7 @@ export function LaunchWindow() {
 		>
 			{systemLocaleSuggestion && (
 				<div
+					ref={setLanguagePromptEl}
 					data-hud-interactive="true"
 					className={`fixed top-8 left-1/2 z-30 w-[calc(100vw-1rem)] max-w-[520px] -translate-x-1/2 rounded-xl border border-white/15 bg-[rgba(20,20,28,0.95)] p-3 shadow-2xl backdrop-blur-xl text-white animate-in fade-in-0 zoom-in-95 duration-200 ${styles.electronNoDrag}`}
 				>

@@ -58,6 +58,9 @@
 		"detailLoadProject": "別のプロジェクトを読み込む前にプロジェクトを保存しますか？",
 		"saveAndLoadProject": "保存してプロジェクトを読み込む",
 		"discardAndLoadProject": "破棄してプロジェクトを読み込む",
+		"detailImportVideo": "動画をインポートする前にプロジェクトを保存しますか？",
+		"saveAndImportVideo": "保存して動画をインポート",
+		"discardAndImportVideo": "破棄して動画をインポート",
 		"loadProject": "プロジェクトを読み込む…",
 		"saveProject": "プロジェクトを保存…",
 		"saveProjectAs": "プロジェクトを名前を付けて保存…"

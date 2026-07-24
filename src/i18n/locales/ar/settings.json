@@ -3,6 +3,7 @@
 		"previewHold": "اضغط مع الاستمرار لمعاينة تأثير التكبير",
 		"level": "مستوى التكبير",
 		"selectRegion": "حدد منطقة التكبير للتعديل",
+		"selectRegionButton": "حدد المنطقة",
 		"deleteZoom": "حذف التكبير",
 		"focusMode": {
 			"title": "وضع التركيز",
@@ -92,7 +93,10 @@
 		"title": "دقة التصدير",
 		"low": "720p",
 		"medium": "1080p",
-		"high": "Source"
+		"high": "2K (1440p)",
+		"ultra": "4K (2160p)",
+		"source": "المصدر",
+		"upscale": "تكبير"
 	},
 	"gifSettings": {
 		"frameRate": "معدل إطارات GIF",

@@ -1,5 +1,5 @@
 import type { Span } from "dnd-timeline";
-import { FolderOpen, Languages, Save, Video } from "lucide-react";
+import { Film, FolderOpen, Languages, Save, Video } from "lucide-react";
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { toast } from "sonner";
@@ -228,6 +228,7 @@ export default function VideoEditor() {
 	durationRef.current = duration;
 	const [selectedZoomId, setSelectedZoomId] = useState<string | null>(null);
 	const [isPreviewingZoom, setIsPreviewingZoom] = useState(false);
+	const [regionSelectionMode, setRegionSelectionMode] = useState(false);
 	const [selectedTrimId, setSelectedTrimId] = useState<string | null>(null);
 	const [selectedSpeedId, setSelectedSpeedId] = useState<string | null>(null);
 	const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
@@ -258,7 +259,7 @@ export default function VideoEditor() {
 	// Unsaved-changes confirmation for New Project / Load Project.
 	// The window-close flow uses showCloseConfirmDialog above.
 	const [confirmDialogVariant, setConfirmDialogVariant] = useState<
-		"newProject" | "loadProject" | null
+		"newProject" | "loadProject" | "importVideo" | null
 	>(null);
 	const playerContainerRef = useRef<HTMLDivElement | null>(null);
 	const cursorTelemetrySourcePath = videoSourcePath ?? (videoPath ? fromFileUrl(videoPath) : null);
@@ -890,6 +891,59 @@ export default function VideoEditor() {
 		await doNewProject();
 	}, [doNewProject]);
 
+	const doImportVideo = useCallback(async () => {
+		const result = await window.electronAPI.openVideoFilePicker();
+		if (result.canceled || !result.success || !result.path) return;
+
+		const setResult = await nativeBridgeClient.project.setCurrentVideoPath(result.path);
+		if (!setResult.success) return;
+
+		// Reset editor state for the new video (same as new project, but with a video path)
+		setVideoPath(toFileUrl(result.path));
+		setVideoSourcePath(result.path);
+		setWebcamVideoPath(null);
+		setWebcamVideoSourcePath(null);
+		setCurrentProjectPath(null);
+		setLastSavedSnapshot(
+			createProjectSnapshot({ screenVideoPath: result.path }, INITIAL_EDITOR_STATE),
+		);
+		resetState();
+		setSelectedZoomId(null);
+		setSelectedTrimId(null);
+		setSelectedSpeedId(null);
+		setSelectedAnnotationId(null);
+		setSelectedBlurId(null);
+		setCurrentTime(0);
+		setIsPlaying(false);
+		nextZoomIdRef.current = 1;
+		nextTrimIdRef.current = 1;
+		nextSpeedIdRef.current = 1;
+		nextAnnotationIdRef.current = 1;
+		nextAnnotationZIndexRef.current = 1;
+		setRegionSelectionMode(false);
+	}, [resetState]);
+
+	const handleImportVideo = useCallback(async () => {
+		if (hasUnsavedChanges) {
+			setConfirmDialogVariant("importVideo");
+			return;
+		}
+		await doImportVideo();
+	}, [hasUnsavedChanges, doImportVideo]);
+
+	const handleImportVideoConfirmSave = useCallback(async () => {
+		setConfirmDialogVariant(null);
+		const saved = await saveProject(false);
+		if (saved) {
+			await doImportVideo();
+		}
+	}, [saveProject, doImportVideo]);
+
+	const handleImportVideoConfirmDiscard = useCallback(async () => {
+		setConfirmDialogVariant(null);
+		await doImportVideo();
+	}, [doImportVideo]);
+
 	useEffect(() => {
 		const removeNewProjectListener = window.electronAPI.onMenuNewProject(handleNewProject);
 		const removeLoadListener = window.electronAPI.onMenuLoadProject(handleLoadProject);
@@ -1226,6 +1280,26 @@ export default function VideoEditor() {
 	const handleZoomCustomScaleCommit = useCallback(() => {
 		commitState();
 	}, [commitState]);
+
+	const handleRegionSelected = useCallback(
+		(region: { focus: ZoomFocus; customScale: number; depth: ZoomDepth }) => {
+			if (!selectedZoomId) return;
+			pushState((prev) => ({
+				zoomRegions: prev.zoomRegions.map((r) =>
+					r.id === selectedZoomId
+						? {
+								...r,
+								focus: clampFocusToDepth(region.focus, r.depth),
+								customScale: region.customScale,
+								depth: region.depth,
+								source: "manual",
+							}
+						: r,
+				),
+			}));
+		},
+		[selectedZoomId, pushState],
+	);
 
 	const handleZoomFocusModeChange = useCallback(
 		(focusMode: ZoomFocusMode) => {
@@ -2517,6 +2591,14 @@ export default function VideoEditor() {
 					</button>
 					<button
 						type="button"
+						onClick={handleImportVideo}
+						className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white/50 hover:text-white/90 hover:bg-white/[0.08] transition-all duration-150 text-[11px] font-medium"
+					>
+						<Film size={14} />
+						{t("emptyState.importVideoButton")}
+					</button>
+					<button
+						type="button"
 						onClick={handleLoadProject}
 						className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white/50 hover:text-white/90 hover:bg-white/[0.08] transition-all duration-150 text-[11px] font-medium"
 					>
@@ -2611,6 +2693,9 @@ export default function VideoEditor() {
 													onSelectZoom={handleSelectZoom}
 													onZoomFocusChange={handleZoomFocusChange}
 													onZoomFocusDragEnd={commitState}
+													regionSelectionMode={regionSelectionMode}
+													onRegionSelectionModeChange={setRegionSelectionMode}
+													onRegionSelected={handleRegionSelected}
 													isPlaying={isPlaying}
 													showShadow={shadowIntensity > 0}
 													shadowIntensity={shadowIntensity}
@@ -2710,6 +2795,8 @@ export default function VideoEditor() {
 												: null
 										}
 										onZoomRotationPresetChange={handleZoomRotationPresetChange}
+										regionSelectionMode={regionSelectionMode}
+										onRegionSelectionModeChange={setRegionSelectionMode}
 										selectedTrimId={selectedTrimId}
 										onTrimDelete={handleTrimDelete}
 										shadowIntensity={shadowIntensity}
@@ -2947,12 +3034,16 @@ export default function VideoEditor() {
 				onSaveAndClose={
 					confirmDialogVariant === "loadProject"
 						? handleLoadProjectConfirmSave
-						: handleNewProjectConfirmSave
+						: confirmDialogVariant === "importVideo"
+							? handleImportVideoConfirmSave
+							: handleNewProjectConfirmSave
 				}
 				onDiscardAndClose={
 					confirmDialogVariant === "loadProject"
 						? handleLoadProjectConfirmDiscard
-						: handleNewProjectConfirmDiscard
+						: confirmDialogVariant === "importVideo"
+							? handleImportVideoConfirmDiscard
+							: handleNewProjectConfirmDiscard
 				}
 				onCancel={() => setConfirmDialogVariant(null)}
 			/>

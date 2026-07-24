@@ -3,6 +3,7 @@
 		"previewHold": "押している間ズーム効果をプレビュー",
 		"level": "ズーム倍率",
 		"selectRegion": "ズーム範囲を選択して調整",
+		"selectRegionButton": "領域を選択",
 		"deleteZoom": "ズームを削除",
 		"focusMode": {
 			"title": "フォーカスモード",
@@ -92,7 +93,10 @@
 		"title": "書き出し解像度",
 		"low": "720p",
 		"medium": "1080p",
-		"high": "Source"
+		"high": "2K (1440p)",
+		"ultra": "4K (2160p)",
+		"source": "ソース",
+		"upscale": "拡大"
 	},
 	"gifSettings": {
 		"frameRate": "GIF フレームレート",

@@ -4,6 +4,7 @@
 		"level": "Zoom Level",
 		"customScale": "Custom Zoom",
 		"selectRegion": "Select a zoom region to adjust",
+		"selectRegionButton": "Select Region",
 		"deleteZoom": "Delete Zoom",
 		"focusMode": {
 			"title": "Focus Mode",
@@ -93,7 +94,10 @@
 		"title": "Export resolution",
 		"low": "720p",
 		"medium": "1080p",
-		"high": "Source"
+		"high": "2K (1440p)",
+		"ultra": "4K (2160p)",
+		"source": "Source",
+		"upscale": "Upscale"
 	},
 	"gifSettings": {
 		"frameRate": "GIF Frame Rate",

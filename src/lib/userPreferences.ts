@@ -80,6 +80,8 @@ export function loadUserPreferences(): UserPreferences {
 		exportQuality:
 			raw.exportQuality === "medium" ||
 			raw.exportQuality === "good" ||
+			raw.exportQuality === "high" ||
+			raw.exportQuality === "ultra" ||
 			raw.exportQuality === "source"
 				? (raw.exportQuality as ExportQuality)
 				: DEFAULT_PREFS.exportQuality,

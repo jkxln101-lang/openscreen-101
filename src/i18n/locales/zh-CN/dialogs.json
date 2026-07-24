@@ -57,6 +57,9 @@
 		"detailLoadProject": "是否在加载其他项目前保存当前项目？",
 		"saveAndLoadProject": "保存并加载项目",
 		"discardAndLoadProject": "放弃并加载项目",
+		"detailImportVideo": "是否在导入视频前保存当前项目？",
+		"saveAndImportVideo": "保存并导入视频",
+		"discardAndImportVideo": "放弃并导入视频",
 		"loadProject": "加载项目…",
 		"saveProject": "保存项目…",
 		"saveProjectAs": "项目另存为…"

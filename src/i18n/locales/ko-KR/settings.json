@@ -4,6 +4,7 @@
 		"level": "줌 레벨",
 		"customScale": "커스텀 줌",
 		"selectRegion": "조정할 줌 구간을 선택하세요",
+		"selectRegionButton": "영역 선택",
 		"deleteZoom": "줌 삭제",
 		"focusMode": {
 			"title": "포커스 모드",
@@ -92,7 +93,10 @@
 		"title": "내보내기 해상도",
 		"low": "720p",
 		"medium": "1080p",
-		"high": "Source"
+		"high": "2K (1440p)",
+		"ultra": "4K (2160p)",
+		"source": "원본",
+		"upscale": "확대"
 	},
 	"gifSettings": {
 		"frameRate": "GIF 프레임 속도",

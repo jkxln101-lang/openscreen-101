@@ -57,6 +57,9 @@
 		"detailLoadProject": "هل تريد حفظ مشروعك قبل تحميل مشروع آخر؟",
 		"saveAndLoadProject": "حفظ وتحميل مشروع",
 		"discardAndLoadProject": "تجاهل وتحميل مشروع",
+		"detailImportVideo": "هل تريد حفظ مشروعك قبل استيراد فيديو؟",
+		"saveAndImportVideo": "حفظ واستيراد فيديو",
+		"discardAndImportVideo": "تجاهل واستيراد فيديو",
 		"loadProject": "تحميل مشروع...",
 		"saveProject": "حفظ المشروع...",
 		"saveProjectAs": "حفظ المشروع باسم..."

@@ -3,6 +3,7 @@
 		"previewHold": "Maintenir pour prévisualiser l'effet de zoom",
 		"level": "Niveau de zoom",
 		"selectRegion": "Sélectionnez une région de zoom à ajuster",
+		"selectRegionButton": "Sélectionner la région",
 		"deleteZoom": "Supprimer le zoom",
 		"focusMode": {
 			"title": "Mode focus",
@@ -92,7 +93,10 @@
 		"title": "Résolution d'export",
 		"low": "720p",
 		"medium": "1080p",
-		"high": "Source"
+		"high": "2K (1440p)",
+		"ultra": "4K (2160p)",
+		"source": "Source",
+		"upscale": "Agrandir"
 	},
 	"gifSettings": {
 		"frameRate": "Fréquence d'images GIF",

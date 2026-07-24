@@ -3,6 +3,7 @@
 		"previewHold": "Yakınlaştırma efektini önizlemek için basılı tutun",
 		"level": "Yakınlaştırma Seviyesi",
 		"selectRegion": "Ayarlamak için bir yakınlaştırma bölgesi seçin",
+		"selectRegionButton": "Bölge Seç",
 		"deleteZoom": "Yakınlaştırmayı Sil",
 		"focusMode": {
 			"title": "Odak Modu",
@@ -92,7 +93,10 @@
 		"title": "Dışa aktarma çözünürlüğü",
 		"low": "720p",
 		"medium": "1080p",
-		"high": "Source"
+		"high": "2K (1440p)",
+		"ultra": "4K (2160p)",
+		"source": "Kaynak",
+		"upscale": "Büyüt"
 	},
 	"gifSettings": {
 		"frameRate": "GIF Kare Hızı",

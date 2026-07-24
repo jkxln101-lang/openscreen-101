@@ -3,6 +3,7 @@
 		"level": "Nível de Zoom",
 		"customScale": "Zoom Personalizado",
 		"selectRegion": "Selecione uma região de zoom para ajustar",
+		"selectRegionButton": "Selecionar região",
 		"deleteZoom": "Excluir Zoom",
 		"focusMode": {
 			"title": "Modo de Foco",
@@ -90,7 +91,10 @@
 		"title": "Qualidade de Exportação",
 		"low": "Baixa",
 		"medium": "Média",
-		"high": "Alta"
+		"high": "2K (1440p)",
+		"ultra": "4K (2160p)",
+		"source": "Original",
+		"upscale": "Ampliar"
 	},
 	"gifSettings": {
 		"frameRate": "Taxa de Quadros do GIF",
