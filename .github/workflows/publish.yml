@@ -74,7 +74,7 @@ jobs:
           gh release create "$TAG" \
             --repo "$REPO" \
             --title "openscreen-101 v${VERSION}" \
-            --notes "## 🎉 openscreen-101 v${VERSION}
+            --notes "##  openscreen-101 v${VERSION}
 
           免费开源的屏幕录制编辑器，Screen Studio 的替代品。
 
@@ -97,9 +97,7 @@ jobs:
           - 如有问题请在 Issues 中反馈
 
           ---
-          感谢原作者 [siddharthvaddem/openscreen](https://github.com/siddharthvaddem/openscreen) 的基础工作！" \
-            --draft \
-            --prerelease
+          感谢原作者 [siddharthvaddem/openscreen](https://github.com/siddharthvaddem/openscreen) 的基础工作！"
 
           echo "Release $TAG created successfully!"
 
@@ -356,6 +354,7 @@ jobs:
   # ─── Upload assets to Release ───────────────────────────────
   upload-assets:
     needs: [create-release, build-windows, build-macos, build-linux]
+    if: always() && needs.create-release.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -384,17 +383,7 @@ jobs:
           # Upload each file to the release
           for file in /tmp/release-assets/*; do
             echo "Uploading $(basename "$file")..."
-            gh release upload "$TAG" "$file" --repo "$REPO" --clobber
+            gh release upload "$TAG" "$file" --repo "$REPO" --clobber || echo "Warning: Failed to upload $(basename "$file")"
           done
 
           echo "All assets uploaded successfully!"
-
-      - name: Publish Release (remove draft)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ needs.create-release.outputs.tag }}
-          REPO: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-          gh release edit "$TAG" --repo "$REPO" --draft=false
-          echo "Release $TAG published!"
