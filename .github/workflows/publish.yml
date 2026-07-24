@@ -1,8 +1,13 @@
 name: Publish Release
 
+# Fully automated: push a tag (e.g. v1.0.0) and everything happens automatically.
+# 1. Auto-create GitHub Release from the tag
+# 2. Build Windows, macOS (arm64+x64), Linux
+# 3. Upload all installers to the Release
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       tag:
@@ -14,8 +19,93 @@ permissions:
   contents: write
 
 jobs:
+  # ─── Create GitHub Release ──────────────────────────────────
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag and version
+        id: meta
+        run: |
+          set -euo pipefail
+          TAG="${{ github.ref_name }}"
+          if [[ -z "$TAG" ]]; then
+            TAG="${{ inputs.tag }}"
+          fi
+          if [[ -z "$TAG" ]]; then
+            echo "::error::No tag resolved"
+            exit 1
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check if release already exists
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --repo "$REPO" &>/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release $TAG already exists, skipping creation."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create GitHub Release
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh release create "$TAG" \
+            --repo "$REPO" \
+            --title "openscreen-101 v${VERSION}" \
+            --notes "## 🎉 openscreen-101 v${VERSION}
+
+          免费开源的屏幕录制编辑器，Screen Studio 的替代品。
+
+          ### ✨ 新功能
+          - 支持 2K/4K 高分辨率导出
+          - 支持导入 MP4 视频
+          - 优化选择区域功能
+          - 改进 UI 体验
+
+          ### 🌍 多语言支持
+          Arabic, English, Español, Français, Italiano, 日本語, 한국어, Português (Brasil), Русский, Türkçe, Tiếng Việt, 简体中文, 繁體中文
+
+          ###  安装
+          - **Windows**: 下载 \`.exe\` 安装包运行
+          - **macOS**: 下载 \`.dmg\` 文件（未签名，需在系统设置中允许打开）
+          - **Linux**: 提供 \`.AppImage\`、\`.deb\`、\`.pacman\` 三种格式
+
+          ### 🐛 已知问题
+          - macOS 版本未签名，首次打开需在「系统设置 > 隐私与安全性」中允许
+          - 如有问题请在 Issues 中反馈
+
+          ---
+          感谢原作者 [siddharthvaddem/openscreen](https://github.com/siddharthvaddem/openscreen) 的基础工作！" \
+            --draft \
+            --prerelease
+
+          echo "Release $TAG created successfully!"
+
   # ─── Windows ────────────────────────────────────────────────
   build-windows:
+    needs: create-release
     runs-on: windows-latest
     steps:
       - name: Checkout code
@@ -44,12 +134,13 @@ jobs:
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installer
+          name: openscreen-101-windows
           path: release/**/*.exe
           retention-days: 7
 
   # ─── macOS ──────────────────────────────────────────────────
   build-macos:
+    needs: create-release
     runs-on: macos-latest
     strategy:
       matrix:
@@ -92,7 +183,7 @@ jobs:
         env:
           OPENSCREEN_MAC_HELPER_ARCHS: ${{ matrix.arch }}
 
-      # ─── Optional code signing ─────────────────────────────
+      # ─── Optional code signing ────────────────────────────
       # Only runs when MAC_CERTIFICATE_P12 secret is set.
       # Without signing, the app still works but shows a Gatekeeper warning.
       - name: Import code signing certificate
@@ -165,8 +256,8 @@ jobs:
 
           rm -rf "$STAGING"
 
-          echo "dmg_path=$DMG_OUTPUT" >> $GITHUB_OUTPUT
-          echo "dmg_name=$DMG_NAME" >> $GITHUB_OUTPUT
+          echo "dmg_path=$DMG_OUTPUT" >> "$GITHUB_OUTPUT"
+          echo "dmg_name=$DMG_NAME" >> "$GITHUB_OUTPUT"
 
       # ─── Optional DMG signing & notarization ────────────────
       - name: Sign DMG
@@ -201,7 +292,7 @@ jobs:
       - name: Upload macOS DMG
         uses: actions/upload-artifact@v4
         with:
-          name: macos-${{ matrix.arch }}
+          name: openscreen-101-mac-${{ matrix.arch }}
           path: ${{ steps.dmg.outputs.dmg_path }}
           retention-days: 7
 
@@ -211,6 +302,7 @@ jobs:
 
   # ─── Linux ──────────────────────────────────────────────────
   build-linux:
+    needs: create-release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -242,7 +334,7 @@ jobs:
       - name: Upload Linux installers
         uses: actions/upload-artifact@v4
         with:
-          name: linux-installer
+          name: openscreen-101-linux
           path: |
             release/**/*.AppImage
             release/**/*.zsync
@@ -250,23 +342,13 @@ jobs:
             release/**/*.pacman
           retention-days: 7
 
-  # ─── Publish to GitHub Release ──────────────────────────────
-  publish:
-    needs: [build-windows, build-macos, build-linux]
+  # ─── Upload assets to Release ───────────────────────────────
+  upload-assets:
+    needs: [create-release, build-windows, build-macos, build-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Resolve tag
-        id: meta
-        run: |
-          TAG="${{ inputs.tag || github.event.release.tag_name }}"
-          if [[ -z "$TAG" ]]; then
-            echo "::error::No tag resolved"
-            exit 1
-          fi
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -276,7 +358,7 @@ jobs:
       - name: Upload assets to GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.meta.outputs.tag }}
+          TAG: ${{ needs.create-release.outputs.tag }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
@@ -295,3 +377,13 @@ jobs:
           done
 
           echo "All assets uploaded successfully!"
+
+      - name: Publish Release (remove draft)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.create-release.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh release edit "$TAG" --repo "$REPO" --draft=false
+          echo "Release $TAG published!"
