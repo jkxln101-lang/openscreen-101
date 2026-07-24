@@ -19,12 +19,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -41,11 +42,11 @@ jobs:
         run: npm run build:win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installer
+          name: openscreen-101-windows
           path: release/**/*.exe
           retention-days: 30
 
@@ -244,7 +245,7 @@ jobs:
       - name: Upload notarized DMG
         uses: actions/upload-artifact@v4
         with:
-          name: openscreen-mac-${{ matrix.arch }}
+          name: openscreen-101-mac-${{ matrix.arch }}
           path: ${{ steps.dmg.outputs.dmg_path }}
           retention-days: 30
 
@@ -257,12 +258,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -288,7 +290,7 @@ jobs:
       - name: Upload Linux build
         uses: actions/upload-artifact@v4
         with:
-          name: linux-installer
+          name: openscreen-101-linux
           path: |
             release/**/*.AppImage
             release/**/*.zsync
